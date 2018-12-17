@@ -16,7 +16,7 @@ stepX = (rightX - leftX) / (numX - 1);
 stepT = (endT - initialT) / (numT - 1);
 
 % 扩散系数
-D = 2e-11;
+D = 9.2e-11;
 
 % 创建C矩阵,并赋值为0
 C = zeros(numT, numX);
@@ -50,22 +50,22 @@ B = eye(numX) + r * S;
 % ------------第三类边界条件开始------------
 b = zeros(numX,1);
 % 处理左边界值,此处左边界满足第三类边界条件
-beta = 3e-8;
-Cp = 0.1;
+beta = 4e-7;
+Cp = 0.01;
 A(1,1) = 2 * (stepX)^2 / D / stepT + 2 * beta * stepX / D + 2;
 A(1,2) = -2;
 B(1,1) = 2 * (stepX)^2 / D / stepT - 2 * beta * stepX / D - 2;
 B(1,2) = 2;
 b(1) = 4 * beta * stepX * Cp / D;
-% 处理右边界值,此处右边界值为0.001
+% 处理右边界值,此处右边界值为0.0013
 A(end,end) = 1;
 A(end,end-1) = 0;
 B(end,end) = 0;
 B(end,end-1) = 0;
-b(end) = 0.001;
+b(end) = 0.0013;
 
 % 边界条件为第三类边界条件时扩散方程的解析解
-C0 = 0.001;
+C0 = 0.0013;
 sol = (Cp - C0) * (erfc(x / sqrt(4 * D * endT)) - exp((beta * x + beta^2 * endT) / D) .* erfc(x / sqrt(4 * D * endT) + beta * sqrt(endT / D))) + C0;
 % ------------第三类边界条件结束------------
 
