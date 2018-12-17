@@ -1,24 +1,24 @@
 function C = solver(leftX, rightX, numX, initialT, endT, numT, icfun)
-% 此方程用于求解碳浓度分布.
-% C为碳浓度分布矩阵,存储着各个位置各个时间的碳浓度值.
+% 此方程采用Crank-Nicolson有限差分方法求解扩散方程.
+% C为碳浓度分布矩阵,存储着各个位置处各个时间点的碳浓度值.
 % 欲使用此方程求解碳浓度分布,需给出以下值:
 % 左边界位置leftX,右边界位置rightX,X轴格点数numX;
 % 初始时间initialT,结束时间endT,时间轴格点数numT;
-% 初始条件方程icfun.
+% 初始条件icfun.
 
-% x轴格点
+% x轴的格点
 x = linspace(leftX, rightX, numX);
-% t轴格点
+% t轴的格点
 t = linspace(initialT, endT, numT);
-% x轴步长
+% x轴的步长
 stepX = (rightX - leftX) / (numX - 1);
-% t轴步长
+% t轴的步长
 stepT = (endT - initialT) / (numT - 1);
 
 % 扩散系数
 D = 2e-11;
 
-% 初始化C矩阵
+% 创建C矩阵,并赋值为0
 C = zeros(numT, numX);
 
 % 给C矩阵赋初始值
@@ -80,6 +80,5 @@ figure(1)
 plot(x,C(end,:),'*',x,sol);
 figure(2)
 plot(t,C(:,1));
-
 
 end
