@@ -63,6 +63,10 @@ A(end,end-1) = 0;
 B(end,end) = 0;
 B(end,end-1) = 0;
 b(end) = 0.001;
+
+% 边界条件为第三类边界条件时扩散方程的解析解
+C0 = 0.001;
+sol = (Cp - C0) * (erfc(x / sqrt(4 * D * endT)) - exp((beta * x + beta^2 * endT) / D) .* erfc(x / sqrt(4 * D * endT) + beta * sqrt(endT / D))) + C0;
 % ------------第三类边界条件结束------------
 
 % ------------C矩阵求解部分开始-------------
@@ -73,8 +77,9 @@ end
 
 % 绘图部分
 figure(1)
-plot(x,C(end,:));
+plot(x,C(end,:),'*',x,sol);
 figure(2)
 plot(t,C(:,1));
+
 
 end
