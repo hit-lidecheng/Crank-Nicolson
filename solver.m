@@ -51,7 +51,7 @@ B = eye(numX) + r * S;
 b = zeros(numX,1);
 % 处理左边界值,此处左边界满足第三类边界条件
 beta = 4e-7;
-Cp = 0.01;
+Cp = 0.02;
 A(1,1) = 2 * (stepX)^2 / D / stepT + 2 * beta * stepX / D + 2;
 A(1,2) = -2;
 B(1,1) = 2 * (stepX)^2 / D / stepT - 2 * beta * stepX / D - 2;
@@ -76,9 +76,6 @@ end
 % ------------C矩阵求解部分结束-------------
 
 % 绘图部分
-figure(1)
-plot(x,C(end,:),'*',x,sol);
-figure(2)
-plot(t,C(:,1));
+plot(x,C(end,:),x,sol);
 
 end
