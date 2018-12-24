@@ -1,81 +1,56 @@
-function C = solver(leftX, rightX, numX, initialT, endT, numT, icfun)
-% 此方程采用Crank-Nicolson有限差分方法求解扩散方程.
-% C为碳浓度分布矩阵,存储着各个位置处各个时间点的碳浓度值.
-% 欲使用此方程求解碳浓度分布,需给出以下值:
-% 左边界位置leftX,右边界位置rightX,X轴格点数numX;
-% 初始时间initialT,结束时间endT,时间轴格点数numT;
-% 初始条件icfun.
+function C = solver(leftX, rightX, numX, initialT, endT, numT, D, beta, Cp, C0)
+%  solver函数利用Crank-Nicolson有限差分格式求解扩散方程.
+%  函数返回值C为numT*numX的二维矩阵,用于存储各位置各时间的碳浓度值.
+%  形参leftX,rightX,numX均为标量,分别表示左边界位置,右边界位置和位置轴格点数量.
+%  形参initialT,endT,numT均为标量,分别表示初始时间,终止时间和时间轴格点数量.
+%  形参D,beta,Cp均为标量,分别表示扩散系数,传递系数和碳势.
+%  形参C0为1*numX的向量,表示各位置处的初始碳浓度值.
 
-% x轴的格点
-x = linspace(leftX, rightX, numX);
-% t轴的格点
-t = linspace(initialT, endT, numT);
-% x轴的步长
-stepX = (rightX - leftX) / (numX - 1);
-% t轴的步长
-stepT = (endT - initialT) / (numT - 1);
 
-% 扩散系数
-D = 9.2e-11;
+deltaX = (rightX - leftX) / (numX - 1);
+deltaT = (endT - initialT) / (numT - 1);
 
-% 创建C矩阵,并赋值为0
+
 C = zeros(numT, numX);
+C(1,:) = C0;
 
-% 给C矩阵赋初始值
-C(1,:) = icfun(x);
 
-% 未考虑初始条件和边界条件时的系数矩阵
-r = 1 / 2 * D * stepT / stepX^2;
+% --------未考虑初始条件和边界条件的系数矩阵--------
+r = 1 / 2 * D * deltaT / deltaX^2;
 e = ones(numX,1);
 S = spdiags([e -2*e e], -1:1, numX, numX);
 A = eye(numX) - r * S;
 B = eye(numX) + r * S;
+% --------未考虑初始条件和边界条件的系数矩阵--------
 
-% ------------第一类边界条件开始------------
-%b = zeros(numX,1);
-% 处理左边界值,此处左边界值为0.012
-%A(1,1) = 1;
-%A(1,2) = 0;
-%B(1,1) = 0;
-%B(1,2) = 0;
-%b(1) = 0.012;
-% 处理右边界值,此处右边界值为0.001
-%A(end,end) = 1;
-%A(end,end-1) = 0;
-%B(end,end) = 0;
-%B(end,end-1) = 0;
-%b(end) = 0.001;
-% ------------第一类边界条件结束------------
 
-% ------------第三类边界条件开始------------
+% -----------------第三类边界条件-----------------
 b = zeros(numX,1);
-% 处理左边界值,此处左边界满足第三类边界条件
-beta = 4e-7;
-Cp = 0.02;
-A(1,1) = 2 * (stepX)^2 / D / stepT + 2 * beta * stepX / D + 2;
+
+% -------------------左边界条件-------------------
+A(1,1) = 2 * deltaX^2 / D / deltaT + 2 * beta * deltaX / D + 2;
 A(1,2) = -2;
-B(1,1) = 2 * (stepX)^2 / D / stepT - 2 * beta * stepX / D - 2;
+B(1,1) = 2 * deltaX^2 / D / deltaT - 2 * beta * deltaX / D - 2;
 B(1,2) = 2;
-b(1) = 4 * beta * stepX * Cp / D;
-% 处理右边界值,此处右边界值为0.0013
+b(1) = 4 * beta * deltaX * Cp / D;
+% -------------------左边界条件-------------------
+
+% -------------------右边界条件-------------------
 A(end,end) = 1;
 A(end,end-1) = 0;
 B(end,end) = 0;
 B(end,end-1) = 0;
-b(end) = 0.0013;
+b(end) = 0.0013; % 0.0013为M50NiL钢初始碳浓度
+% -------------------右边界条件-------------------
 
-% 边界条件为第三类边界条件时扩散方程的解析解
-C0 = 0.0013;
-sol = (Cp - C0) * (erfc(x / sqrt(4 * D * endT)) - exp((beta * x + beta^2 * endT) / D) .* erfc(x / sqrt(4 * D * endT) + beta * sqrt(endT / D))) + C0;
-% ------------第三类边界条件结束------------
+% -------------------第三类边界条件-------------------
 
-% ------------C矩阵求解部分开始-------------
+
+% ------------碳浓度C矩阵求解-------------
 for n = 1:numT-1
     C(n+1,:) = (A \ (B * C(n,:)' + b))';
 end
-% ------------C矩阵求解部分结束-------------
+% ------------碳浓度C矩阵求解-------------
 
-% 绘图部分
-plot(x,C(end,:),x,sol);
 
 end
